@@ -75,3 +75,4 @@ Performance Improvements: Add caching mechanisms to improve performance, especia
 ____________________________________________________________________
  CONCLUSION
 The SMART Climate Resilience Dashboard provides a comprehensive and interactive way to check the weather for multiple cities. By integrating various technologies like Flask, Chart.js, and Leaflet.js, it offers a rich user experience with useful weather data and visualizations. While there are a few limitations, such as the static air quality data, the app provides a strong foundation for further improvements and features in the future.
+for live demo:http://localhost:5000
