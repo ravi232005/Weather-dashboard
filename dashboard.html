@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMART Climate Dashboard</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(to right, #ff7e5f, #feb47b);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #fff;
+        }
+        .name{
+            position:absolute;
+            top:10px;
+            right:20px;
+            font-size:medium;
+            font-weight: lighter;
+            color:black;
+        }
+        .container {
+            text-align: center;
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-container {
+            margin-bottom: 2rem;
+        }
+
+        input[type="text"] {
+            padding: 10px;
+            width: 250px;
+            font-size: 16px;
+            margin-right: 10px;
+            border-radius: 5px;
+            border: none;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #5c6bc0;
+            color: white;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background-color: #3f4c9a;
+        }
+
+        .weather-info {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+        }
+
+        .weather-details {
+            text-align: left;
+            margin-left: 20px;
+        }
+
+        .weather-icon {
+            width: 80px;
+            height: 80px;
+        }
+
+        .flash-messages {
+            margin: 20px;
+        }
+
+        .alert {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .data-section {
+            margin-bottom: 30px;
+        }
+
+        .bottom-section {
+            margin-top: 50px;
+        }
+
+        .chart-container {
+            margin: 20px 0;
+        }
+
+        #map {
+            height: 400px;
+            width: 100%;
+        }
+
+        .weather-container {
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="name">@ravipravin</div>
+    <div class="container">
+        <h1>🌍 SMART Climate Resilience Dashboard</h1>
+         
+        <div class="form-container">
+            <form method="POST">
+                <input type="text" name="city" placeholder="Enter City Names (comma separated)" required>
+                <button type="submit">Get Weather</button>
+            </form>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        {% endwith %}
+
+        {% if weather_data %}
+            <!-- Weather Data Section (Top of Page) -->
+            <div class="weather-container">
+                {% for data in weather_data %}
+                    <div class="data-section">
+                        <h2>Weather in {{ data.city }}</h2>
+                        <div class="weather-info">
+                            <img src="http://openweathermap.org/img/wn/{{ data.icon }}@2x.png" alt="{{ data.weather }}" class="weather-icon">
+                            <div class="weather-details">
+                                <p><strong>Temperature:</strong> {{ data.temp }}°C</p>
+                                <p><strong>Condition:</strong> {{ data.weather }}</p>
+                                <p><strong>Humidity:</strong> {{ data.humidity }}%</p>
+                                <p><strong>Pressure:</strong> {{ data.pressure }} hPa</p>
+                                <p><strong>Wind Speed:</strong> {{ data.wind_speed }} m/s</p>
+                                <p><strong>Air Quality:</strong> {{ data.air_quality }}</p>
+                                <p><strong>UV Index:</strong> {{ data.uv_index }}</p>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <!-- Bottom Section with Temperature Graph and Map -->
+        <div class="bottom-section">
+            {% if weather_data %}
+                {% for data in weather_data %}
+                    <!-- Temperature Graph (Bottom of Page) -->
+                    <div class="chart-container">
+                        <canvas id="tempChart{{ loop.index }}" width="400" height="200"></canvas>
+                        <script>
+                            const ctxTemp = document.getElementById('tempChart{{ loop.index }}').getContext('2d');
+                            new Chart(ctxTemp, {
+                                type: 'line',
+                                data: {
+                                    labels: ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7'],
+                                    datasets: [{
+                                        label: 'Temperature (°C)',
+                                        data: [{{ data.temp - 2 }}, {{ data.temp - 1 }}, {{ data.temp }}, {{ data.temp + 1 }}, {{ data.temp + 2 }}, {{ data.temp + 3 }}, {{ data.temp + 4 }}],
+                                        borderColor: 'rgba(255, 99, 132, 1)',
+                                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                                        fill: true,
+                                    }]
+                                },
+                                options: {
+                                    responsive: true,
+                                    scales: {
+                                        y: { title: { display: true, text: 'Temperature (°C)' } },
+                                        x: { title: { display: true, text: 'Days' } }
+                                    }
+                                }
+                            });
+                        </script>
+                    </div>
+
+                    <!-- Map for Location -->
+                    <div id="map{{ loop.index }}"></div>
+                    <script>
+                        var map = L.map('map{{ loop.index }}').setView([{{ data.lat }}, {{ data.lon }}], 13);
+                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+                        L.marker([{{ data.lat }}, {{ data.lon }}]).addTo(map)
+                            .bindPopup("{{ data.city }}")
+                            .openPopup();
+                    </script>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
