@@ -2,10 +2,10 @@ from flask import Flask, render_template, request, flash
 import requests
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'  # For flashing messages
+app.secret_key = 'your_secret_key'  
 
-# OpenWeatherMap API endpoint and key
-API_KEY = 'd609a6c1d1758a709a9c3bfdc73640a3'  # Replace with your OpenWeatherMap API key
+
+API_KEY = 'd609a6c1d1758a709a9c3bfdc73640a3'  
 BASE_URL = 'http://api.openweathermap.org/data/2.5/weather'
 
 @app.route("/", methods=["GET", "POST"])
@@ -14,7 +14,7 @@ def index():
     if request.method == "POST":
         cities = request.form["city"].split(',')
         for city in cities:
-            city = city.strip()  # Clean up any extra spaces
+            city = city.strip()  
             url = f"{BASE_URL}?q={city}&units=metric&appid={API_KEY}"
             response = requests.get(url)
             if response.status_code == 200:
@@ -29,8 +29,8 @@ def index():
                     "wind_speed": data["wind"]["speed"],
                     "lat": data["coord"]["lat"],
                     "lon": data["coord"]["lon"],
-                    "air_quality": "Good",  # Static for now
-                    "uv_index": "Moderate",  # Static for now
+                    "air_quality": "Good",  
+                    "uv_index": "Moderate",  
                 })
             else:
                 flash(f"Error fetching data for {city}: {response.status_code} - {response.reason}", 'error')
